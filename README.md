@@ -304,9 +304,9 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 ## 📧 Contact
 
 **Your Name**
-- Email: your.email@example.com
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
-- GitHub: [@yourusername](https://github.com/yourusername)
+- Email: yashtembhare2025@gmail.com
+- LinkedIn: https://www.linkedin.com/in/yash-tembhare/https://www.linkedin.com/in/yash-tembhare/
+- GitHub: [@yourusername](https://github.com/Yash-Tembhare)
 
 **Project Link:** https://github.com/yourusername/mini-infra-gpt
 
@@ -316,6 +316,6 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file.
 
 **⭐ Star this repository if you found it helpful!**
 
-**Built with ❤️ for DevOps Learning**
+**Built with ❤️ by - Yash Tembhare for DevOps Learning**
 
 </div>
