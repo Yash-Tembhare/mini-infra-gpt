@@ -4,7 +4,7 @@ Unit tests for AI Parser
 
 import pytest
 import os
-from src.ai_parser import parse_infrastructure_request
+from ai_parser import parse_infrastructure_request
 
 def test_parser_basic():
     """Test basic parsing functionality"""
