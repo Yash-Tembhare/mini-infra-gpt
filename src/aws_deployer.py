@@ -5,7 +5,6 @@ AWS Deployer - Handles Terraform execution and AWS operations
 import subprocess
 import sys
 import time
-import os
 import json
 
 
@@ -129,7 +128,7 @@ def wait_for_instance(instance_ip, timeout=300):
             )
 
             if result.returncode == 0:
-                print(f"✅ Instance is responding to ping!")
+                print("✅ Instance is responding to ping!")
 
                 # Wait a bit more for SSH to be ready
                 print("   Waiting for SSH service...")
@@ -205,7 +204,7 @@ def deploy_infrastructure(terraform_dir='generated-terraform'):
     instance_id = outputs.get('instance_id', {}).get('value')
     app_url = outputs.get('application_url', {}).get('value')
 
-    print(f"\n✅ Deployment Information:")
+    print("\n✅ Deployment Information:")
     print(f"   Instance ID: {instance_id}")
     print(f"   Public IP: {instance_ip}")
     print(f"   Application URL: {app_url}")

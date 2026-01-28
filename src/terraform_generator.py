@@ -281,12 +281,12 @@ output "database_name" {{
     with open(terraform_file, 'w') as f:
         f.write(main_tf)
 
-    print(f"✅ Terraform configuration generated!")
+    print("✅ Terraform configuration generated!")
     print(f"📁 Location: {terraform_file}")
-    print(f"📊 Resources to create:")
-    print(f"   • VPC and Networking")
-    print(f"   • Security Groups")
-    print(f"   • EC2 Instance (t3.micro)")
+    print("📊 Resources to create:")
+    print("   • VPC and Networking")
+    print("   • Security Groups")
+    print("   • EC2 Instance (t3.micro)")
     if specs.get('database_needed'):
         print(f"   • RDS Database ({specs['database_type']})")
 
