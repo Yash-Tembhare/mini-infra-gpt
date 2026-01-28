@@ -3,24 +3,24 @@ Terraform Generator - Creates Terraform configuration files dynamically
 """
 
 import os
-import json
+
 
 def generate_terraform_code(specs):
     """
     Generate Terraform configuration based on parsed specifications
     """
-    
+
     print("📝 Generating Terraform configuration...")
-    
+
     # Create output directory
     output_dir = 'generated-terraform'
     os.makedirs(output_dir, exist_ok=True)
-    
+
     # Main Terraform configuration
     main_tf = f"""
 terraform {{
   required_version = ">= 1.0"
-  
+
   required_providers {{
     aws = {{
       source  = "hashicorp/aws"
@@ -38,7 +38,7 @@ resource "aws_vpc" "main" {{
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
-  
+
   tags = {{
     Name    = "mini-infra-gpt-vpc"
     Project = "mini-infra-gpt"
@@ -50,7 +50,7 @@ resource "aws_subnet" "public" {{
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
   map_public_ip_on_launch = true
-  
+
   tags = {{
     Name    = "public-subnet"
     Project = "mini-infra-gpt"
@@ -60,7 +60,7 @@ resource "aws_subnet" "public" {{
 # Internet Gateway
 resource "aws_internet_gateway" "igw" {{
   vpc_id = aws_vpc.main.id
-  
+
   tags = {{
     Name    = "mini-infra-gpt-igw"
     Project = "mini-infra-gpt"
@@ -70,12 +70,12 @@ resource "aws_internet_gateway" "igw" {{
 # Route Table
 resource "aws_route_table" "public" {{
   vpc_id = aws_vpc.main.id
-  
+
   route {{
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }}
-  
+
   tags = {{
     Name    = "public-route-table"
     Project = "mini-infra-gpt"
@@ -144,16 +144,16 @@ resource "aws_instance" "web" {{
   ami           = data.aws_ami.amazon_linux_2.id
   instance_type = "t3.micro"
   subnet_id     = aws_subnet.public.id
-  
+
   vpc_security_group_ids = [aws_security_group.web.id]
-  
+
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
               yum install -y python3 python3-pip
               pip3 install flask
               EOF
-  
+
   tags = {{
     Name    = "mini-infra-gpt-server"
     Project = "mini-infra-gpt"
@@ -182,18 +182,21 @@ output "application_url" {{
   value       = "http://${{aws_instance.web.public_ip}}"
 }}
 """
-    
+
     # Add database if needed
     if specs.get('database_needed', False):
         print("  ✅ Adding RDS database configuration...")
-        
+
+        db_port = 3306 if specs['database_type'] == 'mysql' else 5432
+        db_version = '8.0' if specs['database_type'] == 'mysql' else '15'
+
         db_config = f"""
 
 # Private Subnet for Database
 resource "aws_subnet" "private" {{
   vpc_id     = aws_vpc.main.id
   cidr_block = "10.0.2.0/24"
-  
+
   tags = {{
     Name    = "private-subnet-db"
     Project = "mini-infra-gpt"
@@ -204,7 +207,7 @@ resource "aws_subnet" "private" {{
 resource "aws_db_subnet_group" "main" {{
   name       = "mini-infra-gpt-db-subnet"
   subnet_ids = [aws_subnet.public.id, aws_subnet.private.id]
-  
+
   tags = {{
     Name    = "mini-infra-gpt-db-subnet-group"
     Project = "mini-infra-gpt"
@@ -218,8 +221,8 @@ resource "aws_security_group" "db" {{
   vpc_id      = aws_vpc.main.id
 
   ingress {{
-    from_port       = {3306 if specs['database_type'] == 'mysql' else 5432}
-    to_port         = {3306 if specs['database_type'] == 'mysql' else 5432}
+    from_port       = {db_port}
+    to_port         = {db_port}
     protocol        = "tcp"
     security_groups = [aws_security_group.web.id]
   }}
@@ -241,20 +244,20 @@ resource "aws_security_group" "db" {{
 resource "aws_db_instance" "main" {{
   identifier        = "mini-infra-gpt-db"
   engine            = "{specs['database_type']}"
-  engine_version    = "{'8.0' if specs['database_type'] == 'mysql' else '15'}"
+  engine_version    = "{db_version}"
   instance_class    = "db.t3.micro"
   allocated_storage = 20
-  
+
   db_name  = "miniinfragpt"
   username = "admin"
   password = "ChangeMe123!"
-  
+
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = [aws_security_group.db.id]
-  
+
   skip_final_snapshot = true
   publicly_accessible = false
-  
+
   tags = {{
     Name    = "mini-infra-gpt-database"
     Project = "mini-infra-gpt"
@@ -272,12 +275,12 @@ output "database_name" {{
 }}
 """
         main_tf += db_config
-    
+
     # Write to file
     terraform_file = os.path.join(output_dir, 'main.tf')
     with open(terraform_file, 'w') as f:
         f.write(main_tf)
-    
+
     print(f"✅ Terraform configuration generated!")
     print(f"📁 Location: {terraform_file}")
     print(f"📊 Resources to create:")
@@ -286,14 +289,15 @@ output "database_name" {{
     print(f"   • EC2 Instance (t3.micro)")
     if specs.get('database_needed'):
         print(f"   • RDS Database ({specs['database_type']})")
-    
+
     return terraform_file
+
 
 if __name__ == "__main__":
     print("=" * 60)
     print("Testing Terraform Generator")
     print("=" * 60)
-    
+
     test_specs = {
         "instance_type": "t3.micro",
         "database_needed": False,
@@ -301,5 +305,5 @@ if __name__ == "__main__":
         "region": "us-east-1",
         "app_type": "web"
     }
-    
+
     generate_terraform_code(test_specs)
