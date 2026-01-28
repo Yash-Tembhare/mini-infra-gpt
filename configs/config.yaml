@@ -1,0 +1,42 @@
+# Mini InfraGPT Configuration
+
+project:
+  name: "mini-infra-gpt"
+  version: "1.0.0"
+  description: "AI-Powered Infrastructure Automation"
+
+aws:
+  default_region: "us-east-1"
+  instance_types:
+    small: "t2.micro"
+    medium: "t2.small"
+    large: "t2.medium"
+  
+  # Free tier eligible instances
+  free_tier_instances:
+    - "t2.micro"
+
+database:
+  engines:
+    - "mysql"
+    - "postgres"
+  
+  default_storage_gb: 20
+  instance_class: "db.t3.micro"
+
+docker:
+  app_port: 5000
+  exposed_port: 80
+
+terraform:
+  output_directory: "generated-terraform"
+  
+monitoring:
+  enabled: true
+  cloudwatch_metrics: true
+
+security:
+  # WARNING: These are defaults for learning
+  # Use AWS Secrets Manager in production
+  ssh_allowed_from: "0.0.0.0/0"
+  http_allowed_from: "0.0.0.0/0"
